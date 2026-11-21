@@ -4,6 +4,7 @@
 streamlit
 huggingface_hub
 torch==2.11.0+cpu
+torchvision==0.26.0+cpu
 transformers==5.16.1
 safetensors==0.8.0
 scikit-learn==1.6.1
