@@ -58,6 +58,7 @@ if submitted:
             st.caption(
                 "The score is a model score, not necessarily a calibrated probability."
             )
-        except Exception as exc:
-            print(repr(exc))  # Available in deployment logs
+        except Exception:
+            import traceback
+            traceback.print_exc()
             st.error("Prediction failed. Check the app logs for details.")
