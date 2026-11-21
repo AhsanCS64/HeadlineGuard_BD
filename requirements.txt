@@ -1,6 +1,9 @@
+--index-url https://download.pytorch.org/whl/cpu
+--extra-index-url https://pypi.org/simple
+
 streamlit
 huggingface_hub
-torch==2.11.0
+torch==2.11.0+cpu
 transformers==5.16.1
 safetensors==0.8.0
 scikit-learn==1.6.1
