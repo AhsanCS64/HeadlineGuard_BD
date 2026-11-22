@@ -1,10 +1,12 @@
+import html as _html
 import importlib
 import sys
+
 import streamlit as st
 from huggingface_hub import snapshot_download
 
 # ==========================================
-# Page Configuration
+# Page configuration
 # ==========================================
 st.set_page_config(
     page_title="HeadlineGuard BD | Bangla Clickbait Detection",
@@ -13,362 +15,381 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ==========================================
-# Custom CSS for Modern, Professional Design
-# ==========================================
-st.markdown(
-    """
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-
-    html, body, [class*="css"] {
-        font-family: 'Plus Jakarta Sans', 'Hind Siliguri', sans-serif;
-    }
-
-    /* Top App Header */
-    .app-header {
-        padding: 1.2rem 0 1.8rem 0;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-        margin-bottom: 2rem;
-    }
-    .app-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        background: #eff6ff;
-        border: 1px solid #bfdbfe;
-        color: #1d4ed8;
-        font-size: 0.78rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        padding: 0.3rem 0.75rem;
-        border-radius: 9999px;
-        margin-bottom: 0.6rem;
-    }
-    .app-title {
-        font-size: 2.1rem;
-        font-weight: 700;
-        color: var(--text-color, #0f172a);
-        margin: 0 0 0.4rem 0;
-    }
-    .app-subtitle {
-        font-size: 1rem;
-        color: #64748b;
-        margin: 0;
-        max-width: 750px;
-        line-height: 1.5;
-    }
-
-    /* Styled Form Container */
-    [data-testid="stForm"] {
-        background: rgba(248, 250, 252, 0.7);
-        border: 1.5px solid #e2e8f0;
-        border-radius: 16px;
-        padding: 2rem 2.2rem;
-        box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.04);
-        transition: all 0.2s ease;
-    }
-    [data-testid="stForm"]:hover {
-        border-color: #cbd5e1;
-    }
-
-    /* Form Header */
-    .form-header {
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-        margin-bottom: 1.2rem;
-    }
-    .form-header h3 {
-        margin: 0;
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--text-color, #0f172a);
-    }
-    .form-header span {
-        font-size: 0.82rem;
-        color: #64748b;
-    }
-
-    /* Textareas and Inputs */
-    .stTextArea textarea {
-        border-radius: 10px;
-        border: 1px solid #cbd5e1;
-        font-family: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif;
-        font-size: 1rem;
-        line-height: 1.6;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-    .stTextArea textarea:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-    }
-
-    /* Submit Button */
-    div[data-testid="stFormSubmitButton"] > button {
-        background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
-        color: #ffffff;
-        font-weight: 600;
-        font-size: 1rem;
-        border-radius: 10px;
-        padding: 0.65rem 2rem;
-        border: none;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-    div[data-testid="stFormSubmitButton"] > button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
-    }
-
-    /* Results Card */
-    .result-box {
-        border-radius: 14px;
-        padding: 1.4rem 1.6rem;
-        margin-top: 1.6rem;
-        margin-bottom: 1.2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
-    .result-clickbait {
-        background: rgba(239, 68, 68, 0.07);
-        border: 1.5px solid #fca5a5;
-        border-left: 6px solid #ef4444;
-    }
-    .result-legit {
-        background: rgba(16, 185, 129, 0.07);
-        border: 1.5px solid #86efac;
-        border-left: 6px solid #10b981;
-    }
-    .result-label {
-        font-size: 1.3rem;
-        font-weight: 700;
-        margin-bottom: 0.3rem;
-    }
-    .result-clickbait .result-label { color: #dc2626; }
-    .result-legit .result-label { color: #059669; }
-
-    /* Developer Profile Card */
-    .dev-card {
-        background: rgba(241, 245, 249, 0.65);
-        border: 1px solid #cbd5e1;
-        border-radius: 12px;
-        padding: 1.1rem;
-        margin-bottom: 1.2rem;
-    }
-    .dev-name {
-        font-size: 1.05rem;
-        font-weight: 700;
-        color: var(--text-color, #0f172a);
-        margin: 0;
-    }
-    .dev-sub {
-        font-size: 0.8rem;
-        color: #64748b;
-        margin-bottom: 0.8rem;
-    }
-    .dev-links a {
-        display: inline-block;
-        color: #2563eb;
-        text-decoration: none;
-        font-size: 0.85rem;
-        font-weight: 500;
-        margin-right: 0.8rem;
-        margin-bottom: 0.3rem;
-    }
-    .dev-links a:hover {
-        text-decoration: underline;
-    }
-
-    /* Footer */
-    .footer {
-        text-align: center;
-        padding: 2.5rem 0 1.5rem 0;
-        color: #94a3b8;
-        font-size: 0.85rem;
-        border-top: 1px solid rgba(148, 163, 184, 0.2);
-        margin-top: 3rem;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-# ==========================================
-# Predictor Cache
-# ==========================================
 REPO_ID = "Archmage64/HeadlineguardBD"
 
+EXAMPLES = [
+    (
+        "Sensational headline",
+        "এই ভিডিও দেখলে আপনার চোখ কপালে উঠবে, যা ঘটল বিশ্বাস করতে পারবেন না!",
+        "",
+    ),
+    (
+        "Standard news",
+        "নতুন শিক্ষাবর্ষে সারা দেশে বিনামূল্যে পাঠ্যবই বিতরণ শুরু",
+        "রোববার থেকে দেশের প্রাথমিক ও মাধ্যমিক স্তরের শিক্ষার্থীদের হাতে নতুন বই তুলে দেওয়া শুরু হয়েছে।",
+    ),
+    (
+        "Curiosity gap",
+        "জনপ্রিয় অভিনেত্রীর গোপন সত্য ফাঁস, কারণ জানলে হতবাক হবেন",
+        "",
+    ),
+]
 
-@st.cache_resource(show_spinner="Connecting to the model repository...")
+
+def html(markup: str) -> None:
+    """Render HTML safely through st.markdown (strips indentation so it is never read as a code block)."""
+    cleaned = "\n".join(line.strip() for line in markup.strip().splitlines() if line.strip())
+    st.markdown(cleaned, unsafe_allow_html=True)
+
+
+# ==========================================
+# Styles (theme-safe: tinted transparency, works in light and dark)
+# ==========================================
+html(
+    """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hind+Siliguri:wght@400;500;600;700&display=swap');
+
+:root {
+    --ink: #3b4cca;
+    --ink-soft: rgba(59, 76, 202, 0.10);
+    --bad: #e5484d;
+    --bad-soft: rgba(229, 72, 77, 0.10);
+    --good: #12a594;
+    --good-soft: rgba(18, 165, 148, 0.10);
+    --line: rgba(128, 128, 128, 0.28);
+    --surface: rgba(128, 128, 128, 0.07);
+    --muted: rgba(128, 128, 128, 0.95);
+}
+
+.stApp, .stMarkdown, .stTextArea textarea, .stButton button, label, p {
+    font-family: 'Hind Siliguri', 'Bricolage Grotesque', system-ui, sans-serif;
+}
+.block-container { max-width: 1080px; padding-top: 2.2rem; padding-bottom: 3rem; }
+header[data-testid="stHeader"] { background: transparent; }
+#MainMenu, footer { visibility: hidden; }
+
+/* ---------- Masthead ---------- */
+.mast {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2rem;
+    align-items: end;
+    padding-bottom: 1.6rem;
+    margin-bottom: 1.8rem;
+    border-bottom: 2px solid var(--ink);
+}
+.mast h1 {
+    font-family: 'Bricolage Grotesque', 'Hind Siliguri', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    margin: 0 0 0.7rem 0;
+    padding: 0;
+}
+.mast p { margin: 0; max-width: 34rem; font-size: 1.08rem; line-height: 1.55; color: var(--muted); }
+.mast-status {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    border: 1px solid var(--line); border-radius: 999px;
+    padding: 0.35rem 0.85rem; font-size: 0.85rem; font-weight: 500; white-space: nowrap;
+}
+.mast-status i { width: 8px; height: 8px; border-radius: 50%; background: var(--good); display: inline-block; }
+@media (max-width: 700px) { .mast { grid-template-columns: 1fr; } }
+
+/* ---------- Form ---------- */
+[data-testid="stForm"] {
+    border: 1.5px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface);
+    padding: 1.6rem 1.8rem 1.4rem;
+}
+.section-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 1.15rem; font-weight: 700; margin: 0 0 0.9rem 0;
+}
+.stTextArea textarea {
+    border-radius: 4px;
+    border: 1.5px solid var(--line);
+    font-size: 1.08rem; line-height: 1.65;
+}
+.stTextArea textarea:focus { border-color: var(--ink); box-shadow: 0 0 0 3px var(--ink-soft); }
+.stTextArea label p { font-weight: 600; font-size: 0.95rem; }
+
+div[data-testid="stFormSubmitButton"] > button {
+    background: var(--ink); color: #fff; border: none; border-radius: 4px;
+    font-weight: 600; font-size: 1.02rem; padding: 0.6rem 1.8rem;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+div[data-testid="stFormSubmitButton"] > button:hover { background: #2f3eb0; color: #fff; transform: translateY(-1px); }
+div[data-testid="stFormSubmitButton"] > button:focus-visible { outline: 3px solid var(--ink-soft); outline-offset: 2px; }
+
+/* Example buttons */
+.stButton > button {
+    border-radius: 4px; border: 1.5px dashed var(--line); background: transparent;
+    font-size: 0.92rem; font-weight: 500; transition: border-color 0.15s ease, background 0.15s ease;
+}
+.stButton > button:hover { border-style: solid; border-color: var(--ink); background: var(--ink-soft); color: inherit; }
+.hint { font-size: 0.9rem; color: var(--muted); margin: 1.1rem 0 0.4rem 0; }
+
+/* ---------- Verdict ---------- */
+.verdict {
+    display: grid; grid-template-columns: auto 1fr; gap: 1.4rem; align-items: center;
+    margin-top: 1.8rem; padding: 1.5rem 1.7rem;
+    border: 1.5px solid; border-radius: 6px;
+}
+.verdict.bad { border-color: var(--bad); background: var(--bad-soft); }
+.verdict.good { border-color: var(--good); background: var(--good-soft); }
+.stamp {
+    width: 76px; height: 76px; border-radius: 50%; border: 3px double; display: grid; place-items: center;
+    font-size: 2rem; transform: rotate(-8deg);
+}
+.bad .stamp { border-color: var(--bad); }
+.good .stamp { border-color: var(--good); }
+.verdict h2 {
+    font-family: 'Bricolage Grotesque', 'Hind Siliguri', sans-serif;
+    font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 0.25rem 0; padding: 0;
+}
+.bad h2 { color: var(--bad); }
+.good h2 { color: var(--good); }
+.verdict p { margin: 0; color: var(--muted); line-height: 1.5; }
+@media (max-width: 560px) { .verdict { grid-template-columns: 1fr; } }
+
+/* ---------- Gauge ---------- */
+.gauge { margin: 1.4rem 0 0.4rem 0; padding: 1.2rem 1.5rem 1rem; border: 1px solid var(--line); border-radius: 6px; }
+.gauge-top { display: flex; justify-content: space-between; font-size: 0.88rem; color: var(--muted); margin-bottom: 0.9rem; }
+.track {
+    position: relative; height: 12px; border-radius: 6px;
+    background: linear-gradient(90deg, var(--good) 0%, #f5b942 50%, var(--bad) 100%);
+}
+.pin {
+    position: absolute; top: -7px; width: 4px; height: 26px; margin-left: -2px; border-radius: 2px;
+    background: currentColor; box-shadow: 0 0 0 3px rgba(128,128,128,0.25);
+}
+.tick { position: absolute; top: -5px; height: 22px; border-left: 2px dashed currentColor; opacity: 0.55; }
+.gauge-legend { display: flex; gap: 1.4rem; margin-top: 1.1rem; font-size: 0.86rem; color: var(--muted); }
+.gauge-legend b { color: inherit; font-weight: 600; }
+
+[data-testid="stMetric"] { border: 1px solid var(--line); border-radius: 6px; padding: 0.9rem 1.1rem; }
+[data-testid="stMetricLabel"] p { font-size: 0.85rem; color: var(--muted); }
+
+/* ---------- How it works ---------- */
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin-top: 2.6rem; border-top: 1px solid var(--line); }
+.step { padding: 1.3rem 1.4rem 0.4rem 0; }
+.step + .step { padding-left: 1.4rem; border-left: 1px solid var(--line); }
+.step b { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.02rem; display: block; margin-bottom: 0.3rem; }
+.step span { font-size: 0.93rem; line-height: 1.5; color: var(--muted); }
+.step em { font-style: normal; color: var(--ink); font-weight: 700; margin-right: 0.4rem; }
+@media (max-width: 700px) {
+    .steps { grid-template-columns: 1fr; }
+    .step + .step { border-left: none; padding-left: 0; border-top: 1px solid var(--line); }
+}
+
+/* ---------- Sidebar ---------- */
+.dev {
+    border: 1px solid var(--line); border-radius: 6px; padding: 1rem 1.1rem; margin-bottom: 1rem; background: var(--surface);
+}
+.dev-name { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 1.05rem; margin: 0; }
+.dev-role { font-size: 0.82rem; color: var(--muted); margin-bottom: 0.7rem; }
+.dev a { display: block; font-size: 0.88rem; font-weight: 500; text-decoration: none; padding: 0.15rem 0; color: var(--ink); }
+.dev a:hover { text-decoration: underline; }
+
+.foot { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 2rem 0 0.5rem; margin-top: 2.4rem; border-top: 1px solid var(--line); }
+.foot a { color: var(--ink); text-decoration: none; font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+"""
+)
+
+
+# ==========================================
+# Predictor cache
+# ==========================================
+@st.cache_resource(show_spinner="Loading the model...")
 def get_predictor():
     token = st.secrets["HF_TOKEN"] if "HF_TOKEN" in st.secrets else None
-    model_path = snapshot_download(
-        repo_id=REPO_ID,
-        repo_type="model",
-        token=token,
-    )
+    model_path = snapshot_download(repo_id=REPO_ID, repo_type="model", token=token)
     sys.path.insert(0, model_path)
     return importlib.import_module("predict")
 
 
+def load_example(headline_text: str, opening_text: str) -> None:
+    st.session_state["headline"] = headline_text
+    st.session_state["opening"] = opening_text
+
+
 # ==========================================
-# Sidebar: Developer & App Info
+# Sidebar
 # ==========================================
 with st.sidebar:
     st.markdown("### 🛡️ HeadlineGuard BD")
-    st.caption("Bangla Clickbait Screening Engine")
-
-    st.markdown("---")
-    st.markdown("#### 👨‍💻 Developer")
-    st.markdown(
+    st.caption("Bangla clickbait screening")
+    html(
         """
-        <div class="dev-card">
+        <div class="dev">
             <div class="dev-name">H. M. Ahsan Habib</div>
-            <div class="dev-sub">Developer & NLP Researcher</div>
-            <div class="dev-links">
-                <a href="https://github.com/AhsanCS64" target="_blank">🐙 GitHub Profile</a><br>
-                <a href="https://github.com/AhsanCS64/HeadlineGuard_BD" target="_blank">📁 Source Code</a><br>
-                <a href="https://huggingface.co/Archmage64/HeadlineguardBD" target="_blank">🤗 Hugging Face Model</a><br>
-                <a href="mailto:kushalahsan@gmail.com">✉️ kushalahsan@gmail.com</a>
-            </div>
+            <div class="dev-role">Developer and NLP researcher</div>
+            <a href="https://github.com/AhsanCS64" target="_blank">GitHub profile</a>
+            <a href="https://github.com/AhsanCS64/HeadlineGuard_BD" target="_blank">Source code</a>
+            <a href="https://huggingface.co/Archmage64/HeadlineguardBD" target="_blank">Hugging Face model</a>
+            <a href="mailto:kushalahsan@gmail.com">kushalahsan@gmail.com</a>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
-
-    st.markdown("#### ℹ️ System Details")
+    st.markdown("#### About the model")
     st.markdown(
-        """
-        - **Model:** Fine-tuned Transformer for Bangla
-        - **Repository:** [`Archmage64/HeadlineguardBD`](https://huggingface.co/Archmage64/HeadlineguardBD)
-        - **Pipeline:** Dual-mode (Headline only or Headline + Lead opening)
-        """
+        "- Fine-tuned Transformer for Bangla\n"
+        "- Two modes: headline only, or headline plus article opening\n"
+        "- Repository: [`Archmage64/HeadlineguardBD`](https://huggingface.co/Archmage64/HeadlineguardBD)"
     )
 
 
 # ==========================================
-# Main Header
+# Masthead
 # ==========================================
-st.markdown(
+html(
     """
-    <div class="app-header">
-        <div class="app-badge">Bangla NLP Verification</div>
-        <h1 class="app-title">🛡️ HeadlineGuard BD</h1>
-        <p class="app-subtitle">
-            Bangla clickbait and sensationalism screening from a news headline and optional article opening.
-        </p>
+    <div class="mast">
+        <div>
+            <h1>🛡️ HeadlineGuard BD</h1>
+            <p>Check whether a Bangla news headline is clickbait. Add the first lines of the article for a more context-aware result.</p>
+        </div>
+        <div class="mast-status"><i></i>Model ready</div>
     </div>
-    """,
-    unsafe_allow_html=True,
+    """
 )
 
+# ==========================================
+# Input form
+# ==========================================
+st.session_state.setdefault("headline", "")
+st.session_state.setdefault("opening", "")
 
-# ==========================================
-# Polished Input Form
-# ==========================================
 with st.form("prediction_form"):
-    st.markdown(
-        """
-        <div class="form-header">
-            <h3>📰 Content Analysis Form</h3>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    html('<div class="section-title">Headline to check</div>')
 
     headline = st.text_area(
         "Bangla headline (বাংলা শিরোনাম) *",
+        key="headline",
+        height=100,
         placeholder="যেমন: নতুন শিক্ষাবর্ষের পাঠ্যবই বিতরণ শুরু...",
-        help="Paste the Bengali news headline you want to analyze.",
+        help="Paste the Bengali news headline you want to check.",
     )
-
     opening = st.text_area(
-        "Article opening — first 1–2 sentences (খবরের প্রথম ১–২টি বাক্য, ঐচ্ছিক)",
-        placeholder="খবরের প্রথম ১–২টি বাক্য এখানে পেস্ট করতে পারেন (ঐচ্ছিক হলেও কনটেক্সট যাচাইয়ে সহায়ক)...",
-        help="Optional: Providing the opening sentences enables lead-contextual screening.",
+        "Article opening, first 1–2 sentences (খবরের প্রথম ১–২টি বাক্য, ঐচ্ছিক)",
+        key="opening",
+        height=130,
+        placeholder="খবরের প্রথম ১–২টি বাক্য এখানে পেস্ট করুন (ঐচ্ছিক, তবে ফলাফল আরও নির্ভরযোগ্য হয়)...",
+        help="Optional. With the opening sentences, the model also checks the headline against the story.",
     )
+    submitted = st.form_submit_button("Check headline", type="primary")
 
-    submitted = st.form_submit_button("🔍 Analyze Content", type="primary")
-
+html('<div class="hint">No headline at hand? Try an example:</div>')
+cols = st.columns(len(EXAMPLES))
+for i, (label, ex_headline, ex_opening) in enumerate(EXAMPLES):
+    with cols[i]:
+        st.button(
+            label,
+            key=f"example_{i}",
+            on_click=load_example,
+            args=(ex_headline, ex_opening),
+            use_container_width=True,
+        )
 
 # ==========================================
-# Results Section
+# Results
 # ==========================================
 if submitted:
     if not headline.strip():
-        st.error("⚠️ Please enter a Bangla headline (অনুগ্রহ করে একটি শিরোনাম প্রদান করুন)।")
+        st.error("Enter a Bangla headline to check (অনুগ্রহ করে একটি শিরোনাম দিন)।")
     else:
         try:
             predictor = get_predictor()
             result = predictor.predict(headline.strip(), opening.strip() if opening else "")
 
-            route = (
-                "Headline + article opening"
-                if result.get("mode") == "lead"
-                else "Headline only"
-            )
-
+            route = "Headline + opening" if result.get("mode") == "lead" else "Headline only"
             raw_label = str(result.get("label", ""))
             score = float(result.get("score", 0.0))
             threshold = float(result.get("threshold", 0.5))
+            label_lower = raw_label.lower()
 
             is_clickbait = (
-                "clickbait" in raw_label.lower()
-                and "non" not in raw_label.lower()
-                and "not" not in raw_label.lower()
-            ) or (score >= threshold and "non" not in raw_label.lower())
+                "clickbait" in label_lower and "non" not in label_lower and "not" not in label_lower
+            ) or (score >= threshold and "non" not in label_lower)
 
-            # Status Banner
+            safe_label = _html.escape(raw_label)
             if is_clickbait:
-                st.markdown(
+                html(
                     f"""
-                    <div class="result-box result-clickbait">
-                        <div class="result-label">🚨 {raw_label}</div>
-                        <div>The analyzed text exhibits traits associated with clickbait or sensational framing.</div>
+                    <div class="verdict bad">
+                        <div class="stamp">🚨</div>
+                        <div>
+                            <h2>{safe_label}</h2>
+                            <p>This text uses patterns common in clickbait or sensational framing.</p>
+                        </div>
                     </div>
-                    """,
-                    unsafe_allow_html=True,
+                    """
                 )
             else:
-                st.markdown(
+                html(
                     f"""
-                    <div class="result-box result-legit">
-                        <div class="result-label">✅ {raw_label}</div>
-                        <div>The analyzed text appears to be standard, informative news reporting.</div>
+                    <div class="verdict good">
+                        <div class="stamp">✅</div>
+                        <div>
+                            <h2>{safe_label}</h2>
+                            <p>This text reads like standard, informative news reporting.</p>
+                        </div>
                     </div>
-                    """,
-                    unsafe_allow_html=True,
+                    """
                 )
 
-            # Metrics
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric("Model score", f"{score:.4f}")
-            with col2:
-                st.metric("Decision threshold", f"{threshold:.4f}")
-            with col3:
-                st.metric("Model pipeline", route)
+            # Gauge: only drawn when score and threshold sit on a 0–1 scale
+            if 0.0 <= score <= 1.0 and 0.0 <= threshold <= 1.0:
+                html(
+                    f"""
+                    <div class="gauge">
+                        <div class="gauge-top"><span>Less clickbait-like</span><span>More clickbait-like</span></div>
+                        <div class="track">
+                            <div class="tick" style="left:{threshold * 100:.1f}%"></div>
+                            <div class="pin" style="left:{score * 100:.1f}%"></div>
+                        </div>
+                        <div class="gauge-legend">
+                            <span>Solid marker: <b>score {score:.3f}</b></span>
+                            <span>Dashed line: <b>decision threshold {threshold:.3f}</b></span>
+                        </div>
+                    </div>
+                    """
+                )
+
+            c1, c2, c3 = st.columns(3)
+            c1.metric("Model score", f"{score:.4f}")
+            c2.metric("Decision threshold", f"{threshold:.4f}")
+            c3.metric("Mode used", route)
 
             st.caption(
-                "Note: The score is a model score relative to the decision threshold, not necessarily a calibrated probability."
+                "The score is measured against the decision threshold. It is not necessarily a calibrated probability."
             )
 
         except Exception:
             import traceback
+
             traceback.print_exc()
-            st.error("Prediction failed. Check the app logs for details.")
-
+            st.error("The check failed. Open the app logs for details, then try again.")
 
 # ==========================================
-# Footer
+# How it works + footer
 # ==========================================
-st.markdown(
+html(
     """
-    <div class="footer">
-        Developed by <strong><a href="https://github.com/AhsanCS64" style="color: #2563eb; text-decoration: none;" target="_blank">H. M. Ahsan Habib</a></strong>
+    <div class="steps">
+        <div class="step"><b><em>1</em>Paste the headline</b><span>Use any Bangla news headline. It is required.</span></div>
+        <div class="step"><b><em>2</em>Add the opening</b><span>Optional. The first one or two sentences let the model compare headline and story.</span></div>
+        <div class="step"><b><em>3</em>Read the verdict</b><span>See the label and where the score falls against the decision threshold.</span></div>
+    </div>
+    <div class="foot">
+        Built by <a href="https://github.com/AhsanCS64" target="_blank">H. M. Ahsan Habib</a>
         &nbsp;|&nbsp; HeadlineGuard BD &copy; 2026
     </div>
-    """,
-    unsafe_allow_html=True,
+    """
 )
