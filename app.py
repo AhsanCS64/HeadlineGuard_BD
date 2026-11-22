@@ -1,6 +1,7 @@
 import html as _html
 import importlib
 import sys
+from pathlib import Path
 
 import streamlit as st
 from huggingface_hub import snapshot_download
@@ -16,6 +17,7 @@ st.set_page_config(
 )
 
 REPO_ID = "Archmage64/HeadlineguardBD"
+LOGO_PATH = Path(__file__).parent / "assets" / "logo.png"
 
 EXAMPLES = [
     (
@@ -43,112 +45,133 @@ def html(markup: str) -> None:
 
 
 # ==========================================
-# Styles (theme-safe: tinted transparency, works in light and dark)
+# Styles (matches the project presentation: deep green, red accent, mint cards, Fira Sans)
 # ==========================================
 html(
     """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hind+Siliguri:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap');
 
+/* Light palette (default) */
 :root {
-    --ink: #3b4cca;
-    --ink-soft: rgba(59, 76, 202, 0.10);
-    --bad: #e5484d;
-    --bad-soft: rgba(229, 72, 77, 0.10);
-    --good: #12a594;
-    --good-soft: rgba(18, 165, 148, 0.10);
-    --line: rgba(128, 128, 128, 0.28);
-    --surface: rgba(128, 128, 128, 0.07);
-    --muted: rgba(128, 128, 128, 0.95);
+    --bg: #F3F8F5;
+    --surface: #FFFFFF;
+    --mint: #E3F0E8;
+    --line: #CFE2D6;
+    --text: #0B2A20;
+    --head: #08402E;
+    --muted: #4A6358;
+    --ink: #0E7A52;
+    --ink-soft: rgba(14, 122, 82, 0.12);
+    --bad: #C62828;
+    --bad-soft: #FDECEA;
+    --good: #0E7A52;
+    --good-soft: #E3F0E8;
+    --red: #C62828;
 }
 
-.stApp, .stMarkdown, .stTextArea textarea, .stButton button, label, p {
-    font-family: 'Hind Siliguri', 'Bricolage Grotesque', system-ui, sans-serif;
+html, body, .stApp, .stMarkdown, .stTextArea textarea, .stButton button, label, p, li {
+    font-family: 'Fira Sans', 'Hind Siliguri', system-ui, sans-serif;
 }
-.block-container { max-width: 1080px; padding-top: 2.2rem; padding-bottom: 3rem; }
+.stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+    background: var(--bg);
+    color: var(--text);
+}
+.block-container { max-width: 1080px; padding-top: 2rem; padding-bottom: 3rem; }
 header[data-testid="stHeader"] { background: transparent; }
 #MainMenu, footer { visibility: hidden; }
 
-/* ---------- Masthead ---------- */
+/* ---------- Masthead (deck cover) ---------- */
 .mast {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 2rem;
-    align-items: end;
-    padding-bottom: 1.6rem;
-    margin-bottom: 1.8rem;
-    border-bottom: 2px solid var(--ink);
+    background: #08402E;
+    border-bottom: 8px solid var(--red);
+    border-radius: 24px;
+    padding: 2.2rem 2.4rem 2rem;
+    margin-bottom: 2rem;
 }
-.mast h1 {
-    font-family: 'Bricolage Grotesque', 'Hind Siliguri', sans-serif;
-    font-weight: 800;
-    font-size: clamp(2.2rem, 5vw, 3.6rem);
-    line-height: 1.02;
-    letter-spacing: -0.03em;
-    margin: 0 0 0.7rem 0;
-    padding: 0;
+.mast-top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.1rem; }
+.mast-tag {
+    background: #FFF6F4; color: var(--red) !important;
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em;
+    padding: 0.4rem 1rem; border-radius: 999px;
 }
-.mast p { margin: 0; max-width: 34rem; font-size: 1.08rem; line-height: 1.55; color: var(--muted); }
 .mast-status {
     display: inline-flex; align-items: center; gap: 0.5rem;
-    border: 1px solid var(--line); border-radius: 999px;
-    padding: 0.35rem 0.85rem; font-size: 0.85rem; font-weight: 500; white-space: nowrap;
+    border: 2px solid #4FA283; border-radius: 999px;
+    padding: 0.3rem 0.9rem; font-size: 0.85rem; font-weight: 600; white-space: nowrap;
+    color: #DDEFE4 !important;
 }
-.mast-status i { width: 8px; height: 8px; border-radius: 50%; background: var(--good); display: inline-block; }
-@media (max-width: 700px) { .mast { grid-template-columns: 1fr; } }
+.mast-status i { width: 9px; height: 9px; border-radius: 50%; background: #6FD3A8; display: inline-block; }
+.mast h1 {
+    font-family: 'Fira Sans', 'Hind Siliguri', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.4rem, 5.5vw, 4rem);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.8rem 0;
+    padding: 0;
+    color: #FFF6F4 !important;
+}
+.mast h1 span { color: #FF9C8A !important; }
+.mast p { margin: 0; max-width: 36rem; font-size: 1.1rem; line-height: 1.55; color: #BFDCCB !important; }
+.chips { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.3rem; }
+.chips span {
+    border: 2px solid #4FA283; border-radius: 999px; padding: 0.25rem 0.9rem;
+    font-size: 0.85rem; font-weight: 600; color: #DDEFE4 !important;
+}
+@media (max-width: 700px) { .mast { padding: 1.5rem 1.3rem; } }
 
 /* ---------- Form ---------- */
 [data-testid="stForm"] {
-    border: 1.5px solid var(--line);
-    border-radius: 6px;
+    border: 2px solid var(--line);
+    border-radius: 24px;
     background: var(--surface);
-    padding: 1.6rem 1.8rem 1.4rem;
+    padding: 1.8rem 2rem 1.5rem;
 }
 .section-title {
-    font-family: 'Bricolage Grotesque', sans-serif;
-    font-size: 1.15rem; font-weight: 700; margin: 0 0 0.9rem 0;
+    font-size: 1.3rem; font-weight: 700; color: var(--head);
+    border-left: 6px solid var(--red); padding-left: 0.8rem; margin: 0 0 1.1rem 0;
 }
 .stTextArea textarea {
-    border-radius: 4px;
-    border: 1.5px solid var(--line);
+    border-radius: 16px;
+    border: 2px solid var(--line);
     font-size: 1.08rem; line-height: 1.65;
 }
 .stTextArea textarea:focus { border-color: var(--ink); box-shadow: 0 0 0 3px var(--ink-soft); }
 .stTextArea label p { font-weight: 600; font-size: 0.95rem; }
 
 div[data-testid="stFormSubmitButton"] > button {
-    background: var(--ink); color: #fff; border: none; border-radius: 4px;
-    font-weight: 600; font-size: 1.02rem; padding: 0.6rem 1.8rem;
+    background: var(--red); color: #fff; border: none; border-radius: 999px;
+    font-weight: 700; font-size: 1.02rem; padding: 0.65rem 2.2rem;
     transition: background 0.15s ease, transform 0.15s ease;
 }
-div[data-testid="stFormSubmitButton"] > button:hover { background: #2f3eb0; color: #fff; transform: translateY(-1px); }
+div[data-testid="stFormSubmitButton"] > button:hover { background: #A81F1F; color: #fff; transform: translateY(-1px); }
 div[data-testid="stFormSubmitButton"] > button:focus-visible { outline: 3px solid var(--ink-soft); outline-offset: 2px; }
 
-/* Example buttons */
+/* Example buttons (deck pills) */
 .stButton > button {
-    border-radius: 4px; border: 1.5px dashed var(--line); background: transparent;
-    font-size: 0.92rem; font-weight: 500; transition: border-color 0.15s ease, background 0.15s ease;
+    border-radius: 999px; border: 2px solid var(--line); background: var(--mint); color: var(--head);
+    font-size: 0.95rem; font-weight: 600; transition: border-color 0.15s ease, background 0.15s ease;
 }
-.stButton > button:hover { border-style: solid; border-color: var(--ink); background: var(--ink-soft); color: inherit; }
-.hint { font-size: 0.9rem; color: var(--muted); margin: 1.1rem 0 0.4rem 0; }
+.stButton > button:hover { border-color: var(--ink); background: var(--ink-soft); color: var(--head); }
+.hint { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; color: var(--muted); margin: 1.6rem 0 0.5rem 0; text-transform: uppercase; }
 
-/* ---------- Verdict ---------- */
+/* ---------- Verdict (deck class cards) ---------- */
 .verdict {
     display: grid; grid-template-columns: auto 1fr; gap: 1.4rem; align-items: center;
-    margin-top: 1.8rem; padding: 1.5rem 1.7rem;
-    border: 1.5px solid; border-radius: 6px;
+    margin-top: 1.8rem; padding: 1.6rem 1.9rem;
+    border-radius: 24px; border-left: 14px solid;
 }
 .verdict.bad { border-color: var(--bad); background: var(--bad-soft); }
 .verdict.good { border-color: var(--good); background: var(--good-soft); }
 .stamp {
-    width: 76px; height: 76px; border-radius: 50%; border: 3px double; display: grid; place-items: center;
-    font-size: 2rem; transform: rotate(-8deg);
+    width: 76px; height: 76px; border-radius: 50%; border: 3px solid; display: grid; place-items: center;
+    font-size: 2rem; transform: rotate(-8deg); background: var(--surface);
 }
 .bad .stamp { border-color: var(--bad); }
 .good .stamp { border-color: var(--good); }
 .verdict h2 {
-    font-family: 'Bricolage Grotesque', 'Hind Siliguri', sans-serif;
-    font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 0.25rem 0; padding: 0;
+    font-size: 1.9rem; font-weight: 800; letter-spacing: -0.01em; margin: 0 0 0.25rem 0; padding: 0;
 }
 .bad h2 { color: var(--bad); }
 .good h2 { color: var(--good); }
@@ -156,46 +179,52 @@ div[data-testid="stFormSubmitButton"] > button:focus-visible { outline: 3px soli
 @media (max-width: 560px) { .verdict { grid-template-columns: 1fr; } }
 
 /* ---------- Gauge ---------- */
-.gauge { margin: 1.4rem 0 0.4rem 0; padding: 1.2rem 1.5rem 1rem; border: 1px solid var(--line); border-radius: 6px; }
-.gauge-top { display: flex; justify-content: space-between; font-size: 0.88rem; color: var(--muted); margin-bottom: 0.9rem; }
+.gauge { margin: 1.4rem 0 0.6rem 0; padding: 1.3rem 1.6rem 1.1rem; border: 2px solid var(--line); border-radius: 24px; background: var(--surface); }
+.gauge-top { display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 500; color: var(--muted); margin-bottom: 1rem; }
 .track {
-    position: relative; height: 12px; border-radius: 6px;
-    background: linear-gradient(90deg, var(--good) 0%, #f5b942 50%, var(--bad) 100%);
+    position: relative; height: 14px; border-radius: 7px;
+    background: linear-gradient(90deg, #2E9E74 0%, #F5C84B 50%, #C62828 100%);
 }
 .pin {
-    position: absolute; top: -7px; width: 4px; height: 26px; margin-left: -2px; border-radius: 2px;
-    background: currentColor; box-shadow: 0 0 0 3px rgba(128,128,128,0.25);
+    position: absolute; top: -8px; width: 5px; height: 30px; margin-left: -2px; border-radius: 3px;
+    background: var(--head); box-shadow: 0 0 0 3px var(--surface);
 }
-.tick { position: absolute; top: -5px; height: 22px; border-left: 2px dashed currentColor; opacity: 0.55; }
-.gauge-legend { display: flex; gap: 1.4rem; margin-top: 1.1rem; font-size: 0.86rem; color: var(--muted); }
-.gauge-legend b { color: inherit; font-weight: 600; }
+.tick { position: absolute; top: -6px; height: 26px; border-left: 3px dashed var(--bad); }
+.gauge-legend { display: flex; flex-wrap: wrap; gap: 0.4rem 1.6rem; margin-top: 1.2rem; font-size: 0.86rem; color: var(--muted); }
+.gauge-legend b { color: var(--head); font-weight: 700; }
 
-[data-testid="stMetric"] { border: 1px solid var(--line); border-radius: 6px; padding: 0.9rem 1.1rem; }
-[data-testid="stMetricLabel"] p { font-size: 0.85rem; color: var(--muted); }
+[data-testid="stMetric"] { background: var(--surface); border: 2px solid var(--line); border-top: 8px solid var(--ink); border-radius: 20px; padding: 0.9rem 1.2rem 1rem; }
+[data-testid="stMetricLabel"] p { font-size: 0.9rem; font-weight: 500; color: var(--muted); }
+[data-testid="stMetricValue"] { font-weight: 800; color: var(--head); }
 
-/* ---------- How it works ---------- */
-.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin-top: 2.6rem; border-top: 1px solid var(--line); }
-.step { padding: 1.3rem 1.4rem 0.4rem 0; }
-.step + .step { padding-left: 1.4rem; border-left: 1px solid var(--line); }
-.step b { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.02rem; display: block; margin-bottom: 0.3rem; }
-.step span { font-size: 0.93rem; line-height: 1.5; color: var(--muted); }
-.step em { font-style: normal; color: var(--ink); font-weight: 700; margin-right: 0.4rem; }
-@media (max-width: 700px) {
-    .steps { grid-template-columns: 1fr; }
-    .step + .step { border-left: none; padding-left: 0; border-top: 1px solid var(--line); }
+/* ---------- How it works (deck cards) ---------- */
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 2.6rem; }
+.step { background: var(--surface); border: 2px solid var(--line); border-top: 8px solid var(--ink); border-radius: 20px; padding: 1.2rem 1.4rem 1.3rem; }
+.step:nth-child(2) { border-top-color: var(--red); }
+.step b { font-size: 1.1rem; font-weight: 700; color: var(--head); display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.5rem; }
+.step span { font-size: 0.95rem; line-height: 1.5; color: var(--muted); }
+.step em {
+    font-style: normal; font-weight: 700; font-size: 0.95rem; color: #fff;
+    background: var(--red); width: 1.9rem; height: 1.9rem; border-radius: 50%;
+    display: inline-grid; place-items: center; flex: none;
 }
+@media (max-width: 700px) { .steps { grid-template-columns: 1fr; } }
 
-/* ---------- Sidebar ---------- */
+/* ---------- Sidebar (deep green, like the dark slides) ---------- */
+[data-testid="stSidebar"] { background: #08402E; border-right: 6px solid var(--red); }
+[data-testid="stSidebar"] * { color: #F3F8F5; }
+[data-testid="stSidebar"] [data-testid="stImage"] img { background: #FFFFFF; border-radius: 20px; padding: 10px 14px; margin-bottom: 0.6rem; }
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] { color: #BFDCCB !important; }
 .dev {
-    border: 1px solid var(--line); border-radius: 6px; padding: 1rem 1.1rem; margin-bottom: 1rem; background: var(--surface);
+    border: 2px solid #2E9E74; border-radius: 20px; padding: 1.1rem 1.2rem; margin-bottom: 1rem; background: #0F5A41;
 }
-.dev-name { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 1.05rem; margin: 0; }
-.dev-role { font-size: 0.82rem; color: var(--muted); margin-bottom: 0.7rem; }
-.dev a { display: block; font-size: 0.88rem; font-weight: 500; text-decoration: none; padding: 0.15rem 0; color: var(--ink); }
+.dev-name { font-weight: 700; font-size: 1.08rem; margin: 0; color: #FFF6F4 !important; }
+.dev-role { font-size: 0.84rem; color: #BFDCCB !important; margin-bottom: 0.7rem; }
+.dev a { display: block; font-size: 0.9rem; font-weight: 600; text-decoration: none; padding: 0.15rem 0; color: #9FE0C2 !important; }
 .dev a:hover { text-decoration: underline; }
 
-.foot { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 2rem 0 0.5rem; margin-top: 2.4rem; border-top: 1px solid var(--line); }
-.foot a { color: var(--ink); text-decoration: none; font-weight: 600; }
+.foot { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 2rem 0 0.5rem; margin-top: 2.4rem; border-top: 2px solid var(--line); }
+.foot a { color: var(--ink); text-decoration: none; font-weight: 700; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -206,43 +235,42 @@ div[data-testid="stFormSubmitButton"] > button:focus-visible { outline: 3px soli
 # ==========================================
 # Theme
 # ==========================================
-st.session_state.setdefault("theme", "Dark")
-_theme = st.session_state.get("theme", "Dark")
+st.session_state.setdefault("theme", "Light")
+_theme = st.session_state.get("theme", "Light")
 
 if _theme == "Dark":
     html(
         """
         <style>
         :root {
-            --ink: #8b96ff;
-            --ink-soft: rgba(139, 150, 255, 0.16);
-            --bad: #ff6b73;
-            --bad-soft: rgba(255, 107, 115, 0.14);
-            --good: #2dd4bf;
-            --good-soft: rgba(45, 212, 191, 0.14);
-            --line: rgba(255, 255, 255, 0.16);
-            --surface: rgba(255, 255, 255, 0.05);
-            --muted: rgba(236, 238, 242, 0.72);
+            --bg: #08402E;
+            --surface: #0F5A41;
+            --mint: #0C4D37;
+            --line: #2A7F60;
+            --text: #F3F8F5;
+            --head: #F3F8F5;
+            --muted: #BFDCCB;
+            --ink: #6FD3A8;
+            --ink-soft: rgba(111, 211, 168, 0.18);
+            --bad: #FF9C90;
+            --bad-soft: rgba(255, 156, 144, 0.16);
+            --good: #6FD3A8;
+            --good-soft: rgba(111, 211, 168, 0.16);
             color-scheme: dark;
         }
-        .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
-            background: #16181d;
-            color: #eceef2;
-        }
-        [data-testid="stSidebar"] {
-            background: #1e2128;
-            border-right: 1px solid var(--line);
-        }
-        [data-testid="stSidebar"] * { color: inherit; }
+        [data-testid="stSidebar"] { background: #062F22; }
+        .dev { background: #08402E; }
         .stTextArea textarea, div[data-baseweb="input"] > div, div[data-baseweb="base-input"] > input {
-            background: rgba(255,255,255,0.04) !important;
-            color: #eceef2 !important;
+            background: rgba(0, 0, 0, 0.22) !important;
+            color: #F3F8F5 !important;
         }
-        [data-testid="stMetricValue"], [data-testid="stMetricLabel"] p, .stMarkdown, p, label, span, h1, h2, h3 {
+        [data-testid="stMain"] p, [data-testid="stMain"] label, [data-testid="stMain"] li,
+        [data-testid="stMetricLabel"] p, [data-testid="stMetricValue"] {
             color: inherit;
         }
-        div[data-testid="stFormSubmitButton"] > button:hover { background: #7480ff; color: #fff; }
-        .stButton > button { color: #eceef2; }
+        .stCaption, [data-testid="stCaptionContainer"] { color: var(--muted) !important; }
+        .stButton > button { color: #F3F8F5; }
+        .stButton > button:hover { color: #F3F8F5; }
         </style>
         """
     )
@@ -250,40 +278,25 @@ else:
     html(
         """
         <style>
-        :root {
-            --ink: #3342b8;
-            --ink-soft: rgba(51, 66, 184, 0.10);
-            --bad: #c62828;
-            --bad-soft: rgba(198, 40, 40, 0.10);
-            --good: #0d7a6d;
-            --good-soft: rgba(13, 122, 109, 0.10);
-            --line: rgba(26, 28, 34, 0.18);
-            --surface: rgba(51, 66, 184, 0.04);
-            --muted: #4a5160;
-            color-scheme: light;
-        }
-        .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
-            background: #f6f7fb;
-            color: #1a1c22;
-        }
-        [data-testid="stSidebar"] {
-            background: #eef1f7;
-            border-right: 1px solid var(--line);
-        }
-        [data-testid="stSidebar"] * { color: #1a1c22; }
+        :root { color-scheme: light; }
         .stTextArea textarea, div[data-baseweb="input"] > div, div[data-baseweb="base-input"] > input {
-            background: #ffffff !important;
-            color: #1a1c22 !important;
-            border-color: rgba(26, 28, 34, 0.24) !important;
+            background: #FFFFFF !important;
+            color: #0B2A20 !important;
+            border-color: #CFE2D6 !important;
         }
-        [data-testid="stMetricValue"], [data-testid="stMetricLabel"] p, .stMarkdown, p, label, span, h1, h2, h3, li {
+        .stTextArea textarea::placeholder,
+        div[data-baseweb="input"] input::placeholder,
+        div[data-baseweb="base-input"] input::placeholder {
+            color: #5f6f67 !important;
+            opacity: 1 !important;
+            -webkit-text-fill-color: #5f6f67 !important;
+        }
+        [data-testid="stMain"] p, [data-testid="stMain"] label, [data-testid="stMain"] li,
+        [data-testid="stMetricLabel"] p {
             color: inherit;
         }
         .stCaption, [data-testid="stCaptionContainer"] { color: var(--muted) !important; }
-        div[data-testid="stFormSubmitButton"] > button { color: #fff; }
-        div[data-testid="stFormSubmitButton"] > button:hover { background: #2a3699; color: #fff; }
-        .stButton > button { color: #1a1c22; background: #ffffff; border-color: rgba(26, 28, 34, 0.28); }
-        .stButton > button:hover { color: #1a1c22; border-color: var(--ink); background: var(--ink-soft); }
+        .stButton > button { color: #08402E; }
         </style>
         """
     )
@@ -294,7 +307,10 @@ else:
 # ==========================================
 @st.cache_resource(show_spinner="Loading the model...")
 def get_predictor():
-    token = st.secrets["HF_TOKEN"] if "HF_TOKEN" in st.secrets else None
+    try:
+        token = st.secrets.get("HF_TOKEN")
+    except Exception:
+        token = None
     model_path = snapshot_download(repo_id=REPO_ID, repo_type="model", token=token)
     sys.path.insert(0, model_path)
     return importlib.import_module("predict")
@@ -309,7 +325,9 @@ def load_example(headline_text: str, opening_text: str) -> None:
 # Sidebar
 # ==========================================
 with st.sidebar:
-    st.markdown("### 🛡️ HeadlineGuard BD")
+    if LOGO_PATH.exists():
+        st.image(str(LOGO_PATH), width="stretch")
+    st.markdown("### HeadlineGuard BD")
     st.caption("Bangla clickbait screening")
     st.radio(
         "Appearance",
@@ -344,11 +362,13 @@ with st.sidebar:
 html(
     """
     <div class="mast">
-        <div>
-            <h1>🛡️ HeadlineGuard BD</h1>
-            <p>Check whether a Bangla news headline is clickbait. Add the first lines of the article for a more context-aware result.</p>
+        <div class="mast-top">
+            <span class="mast-tag">BANGLA CLICKBAIT DETECTION</span>
+            <div class="mast-status"><i></i>Model ready</div>
         </div>
-        <div class="mast-status"><i></i>Model ready</div>
+        <h1>HeadlineGuard <span>BD</span></h1>
+        <p>Check whether a Bangla news headline is clickbait. Add the first lines of the article for a more context-aware result.</p>
+        <div class="chips"><span>BanglaBERT</span><span>TF-IDF + Linear SVM</span><span>Ensemble learning</span></div>
     </div>
     """
 )
@@ -378,7 +398,7 @@ with st.form("prediction_form"):
     )
     submitted = st.form_submit_button("Check headline", type="primary")
 
-html('<div class="hint">No headline at hand? Try an example:</div>')
+html('<div class="hint">No headline at hand? Try an example</div>')
 cols = st.columns(len(EXAMPLES))
 for i, (label, ex_headline, ex_opening) in enumerate(EXAMPLES):
     with cols[i]:
@@ -387,7 +407,7 @@ for i, (label, ex_headline, ex_opening) in enumerate(EXAMPLES):
             key=f"example_{i}",
             on_click=load_example,
             args=(ex_headline, ex_opening),
-            use_container_width=True,
+            width="stretch",
         )
 
 # ==========================================
