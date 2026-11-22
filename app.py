@@ -204,6 +204,79 @@ div[data-testid="stFormSubmitButton"] > button:focus-visible { outline: 3px soli
 
 
 # ==========================================
+# Theme
+# ==========================================
+st.session_state.setdefault("theme", "Light")
+_theme = st.session_state.get("theme", "Light")
+
+if _theme == "Dark":
+    html(
+        """
+        <style>
+        :root {
+            --ink: #8b96ff;
+            --ink-soft: rgba(139, 150, 255, 0.16);
+            --bad: #ff6b73;
+            --bad-soft: rgba(255, 107, 115, 0.14);
+            --good: #2dd4bf;
+            --good-soft: rgba(45, 212, 191, 0.14);
+            --line: rgba(255, 255, 255, 0.16);
+            --surface: rgba(255, 255, 255, 0.05);
+            --muted: rgba(236, 238, 242, 0.72);
+            color-scheme: dark;
+        }
+        .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+            background: #16181d;
+            color: #eceef2;
+        }
+        [data-testid="stSidebar"] {
+            background: #1e2128;
+            border-right: 1px solid var(--line);
+        }
+        [data-testid="stSidebar"] * { color: inherit; }
+        .stTextArea textarea, div[data-baseweb="input"] > div, div[data-baseweb="base-input"] > input {
+            background: rgba(255,255,255,0.04) !important;
+            color: #eceef2 !important;
+        }
+        [data-testid="stMetricValue"], [data-testid="stMetricLabel"] p, .stMarkdown, p, label, span, h1, h2, h3 {
+            color: inherit;
+        }
+        div[data-testid="stFormSubmitButton"] > button:hover { background: #7480ff; color: #fff; }
+        .stButton > button { color: #eceef2; }
+        </style>
+        """
+    )
+else:
+    html(
+        """
+        <style>
+        :root {
+            --ink: #3b4cca;
+            --ink-soft: rgba(59, 76, 202, 0.10);
+            --bad: #e5484d;
+            --bad-soft: rgba(229, 72, 77, 0.10);
+            --good: #12a594;
+            --good-soft: rgba(18, 165, 148, 0.10);
+            --line: rgba(128, 128, 128, 0.28);
+            --surface: rgba(128, 128, 128, 0.07);
+            --muted: rgba(90, 90, 90, 0.95);
+            color-scheme: light;
+        }
+        .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+            background: #ffffff;
+            color: #1a1c22;
+        }
+        [data-testid="stSidebar"] {
+            background: #f7f8fb;
+            border-right: 1px solid var(--line);
+        }
+        div[data-testid="stFormSubmitButton"] > button:hover { background: #2f3eb0; color: #fff; }
+        </style>
+        """
+    )
+
+
+# ==========================================
 # Predictor cache
 # ==========================================
 @st.cache_resource(show_spinner="Loading the model...")
@@ -225,11 +298,18 @@ def load_example(headline_text: str, opening_text: str) -> None:
 with st.sidebar:
     st.markdown("### 🛡️ HeadlineGuard BD")
     st.caption("Bangla clickbait screening")
+    st.radio(
+        "Appearance",
+        ["Light", "Dark"],
+        horizontal=True,
+        key="theme",
+        help="Switch between light and dark mode.",
+    )
     html(
         """
         <div class="dev">
             <div class="dev-name">H. M. Ahsan Habib Kushal</div>
-            <div class="dev-role">Developer and NLP researcher</div>
+            <div class="dev-role">Developer and Contrastive Learning, NLP researcher</div>
             <a href="https://github.com/AhsanCS64" target="_blank">GitHub profile</a>
             <a href="https://github.com/AhsanCS64/HeadlineGuard_BD" target="_blank">Source code</a>
             <a href="https://huggingface.co/Archmage64/HeadlineguardBD" target="_blank">Hugging Face model</a>
@@ -388,7 +468,7 @@ html(
         <div class="step"><b><em>3</em>Read the verdict</b><span>See the label and where the score falls against the decision threshold.</span></div>
     </div>
     <div class="foot">
-        Built by <a href="https://github.com/AhsanCS64" target="_blank">H. M. Ahsan Habib</a>
+        Built by <a href="https://github.com/AhsanCS64" target="_blank">H. M. Ahsan Habib Kushal</a>
         &nbsp;|&nbsp; HeadlineGuard BD &copy; 2026
     </div>
     """
