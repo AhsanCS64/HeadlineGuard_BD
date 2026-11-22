@@ -206,8 +206,8 @@ div[data-testid="stFormSubmitButton"] > button:focus-visible { outline: 3px soli
 # ==========================================
 # Theme
 # ==========================================
-st.session_state.setdefault("theme", "Light")
-_theme = st.session_state.get("theme", "Light")
+st.session_state.setdefault("theme", "Dark")
+_theme = st.session_state.get("theme", "Dark")
 
 if _theme == "Dark":
     html(
@@ -251,26 +251,39 @@ else:
         """
         <style>
         :root {
-            --ink: #3b4cca;
-            --ink-soft: rgba(59, 76, 202, 0.10);
-            --bad: #e5484d;
-            --bad-soft: rgba(229, 72, 77, 0.10);
-            --good: #12a594;
-            --good-soft: rgba(18, 165, 148, 0.10);
-            --line: rgba(128, 128, 128, 0.28);
-            --surface: rgba(128, 128, 128, 0.07);
-            --muted: rgba(90, 90, 90, 0.95);
+            --ink: #3342b8;
+            --ink-soft: rgba(51, 66, 184, 0.10);
+            --bad: #c62828;
+            --bad-soft: rgba(198, 40, 40, 0.10);
+            --good: #0d7a6d;
+            --good-soft: rgba(13, 122, 109, 0.10);
+            --line: rgba(26, 28, 34, 0.18);
+            --surface: rgba(51, 66, 184, 0.04);
+            --muted: #4a5160;
             color-scheme: light;
         }
         .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
-            background: #ffffff;
+            background: #f6f7fb;
             color: #1a1c22;
         }
         [data-testid="stSidebar"] {
-            background: #f7f8fb;
+            background: #eef1f7;
             border-right: 1px solid var(--line);
         }
-        div[data-testid="stFormSubmitButton"] > button:hover { background: #2f3eb0; color: #fff; }
+        [data-testid="stSidebar"] * { color: #1a1c22; }
+        .stTextArea textarea, div[data-baseweb="input"] > div, div[data-baseweb="base-input"] > input {
+            background: #ffffff !important;
+            color: #1a1c22 !important;
+            border-color: rgba(26, 28, 34, 0.24) !important;
+        }
+        [data-testid="stMetricValue"], [data-testid="stMetricLabel"] p, .stMarkdown, p, label, span, h1, h2, h3, li {
+            color: inherit;
+        }
+        .stCaption, [data-testid="stCaptionContainer"] { color: var(--muted) !important; }
+        div[data-testid="stFormSubmitButton"] > button { color: #fff; }
+        div[data-testid="stFormSubmitButton"] > button:hover { background: #2a3699; color: #fff; }
+        .stButton > button { color: #1a1c22; background: #ffffff; border-color: rgba(26, 28, 34, 0.28); }
+        .stButton > button:hover { color: #1a1c22; border-color: var(--ink); background: var(--ink-soft); }
         </style>
         """
     )
