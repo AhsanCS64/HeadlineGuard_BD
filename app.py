@@ -3,15 +3,19 @@ import importlib
 import sys
 from pathlib import Path
 
+from pathlib import Path
+
 import streamlit as st
 from huggingface_hub import snapshot_download
+
+LOGO_PATH = Path(__file__).parent / "assets" / "logo.png"
 
 # ==========================================
 # Page configuration
 # ==========================================
 st.set_page_config(
     page_title="HeadlineGuard BD | Bangla Clickbait Detection",
-    page_icon="🛡️",
+    page_icon=str(LOGO_PATH) if LOGO_PATH.exists() else "🛡️",
     layout="wide",
     initial_sidebar_state="expanded",
 )
