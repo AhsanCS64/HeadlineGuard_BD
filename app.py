@@ -3,6 +3,7 @@ import importlib
 import sys
 from pathlib import Path
 
+import base64
 from pathlib import Path
 
 import streamlit as st
@@ -46,6 +47,13 @@ def html(markup: str) -> None:
     """Render HTML safely through st.markdown (strips indentation so it is never read as a code block)."""
     cleaned = "\n".join(line.strip() for line in markup.strip().splitlines() if line.strip())
     st.markdown(cleaned, unsafe_allow_html=True)
+
+
+def logo_data_uri() -> str:
+    if not LOGO_PATH.exists():
+        return ""
+    data = base64.b64encode(LOGO_PATH.read_bytes()).decode("ascii")
+    return f"data:image/png;base64,{data}"
 
 
 # ==========================================
@@ -94,6 +102,12 @@ header[data-testid="stHeader"] { background: transparent; }
     margin-bottom: 2rem;
 }
 .mast-top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.1rem; }
+.mast-brand { display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap; }
+.mast-logo {
+    height: 56px; width: auto; display: block;
+    background: rgba(255, 246, 244, 0.96);
+    padding: 0.35rem 0.55rem; border-radius: 12px;
+}
 .mast-tag {
     background: #FFF6F4; color: var(--red) !important;
     font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em;
@@ -363,11 +377,20 @@ with st.sidebar:
 # ==========================================
 # Masthead
 # ==========================================
+_logo = logo_data_uri()
+_logo_html = (
+    f'<img class="mast-logo" src="{_logo}" alt="HeadlineGuard BD logo">'
+    if _logo
+    else ""
+)
 html(
-    """
+    f"""
     <div class="mast">
         <div class="mast-top">
-            <span class="mast-tag">BANGLA CLICKBAIT DETECTION</span>
+            <div class="mast-brand">
+                {_logo_html}
+                <span class="mast-tag">BANGLA CLICKBAIT DETECTION</span>
+            </div>
             <div class="mast-status"><i></i>Model ready</div>
         </div>
         <h1>HeadlineGuard <span>BD</span></h1>
