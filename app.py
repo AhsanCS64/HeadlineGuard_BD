@@ -228,7 +228,7 @@ with st.sidebar:
     html(
         """
         <div class="dev">
-            <div class="dev-name">H. M. Ahsan Habib</div>
+            <div class="dev-name">H. M. Ahsan Habib Kushal</div>
             <div class="dev-role">Developer and NLP researcher</div>
             <a href="https://github.com/AhsanCS64" target="_blank">GitHub profile</a>
             <a href="https://github.com/AhsanCS64/HeadlineGuard_BD" target="_blank">Source code</a>
