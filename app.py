@@ -104,7 +104,7 @@ header[data-testid="stHeader"] { background: transparent; }
 .mast-top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.1rem; }
 .mast-brand { display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap; }
 .mast-logo {
-    height: 56px; width: auto; display: block;
+    height: 70px; width: auto; display: block;
     background: rgba(255, 246, 244, 0.96);
     padding: 0.35rem 0.55rem; border-radius: 12px;
 }
